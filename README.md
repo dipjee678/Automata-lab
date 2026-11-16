@@ -117,8 +117,16 @@ npm run test:e2e:prod
 
 ### Before real students use it
 
-- Delete the seeded demo accounts in Supabase (Authentication → Users) or never seed
-  the production project: they share a published password.
+- The seeded demo accounts share a published password. Delete them in Supabase
+  (Authentication → Users), never seed the production project, or block individual
+  ones without deleting their data:
+
+  ```bash
+  npm run demo-access -w backend -- disable admin@automatalab.test
+  ```
+
+  (`enable` reverses it.) A public showcase can keep the demo student and teacher,
+  but the demo admin should always be disabled.
 - Create your own admin: register normally, then set `role = 'admin'` for that row in
   the `profiles` table (Supabase → Table Editor). Further admins can be promoted in the app.
 - Set `ALLOW_TEACHER_SIGNUP=false` if teachers should only be appointed by an admin.
@@ -128,6 +136,6 @@ npm run test:e2e:prod
 - Supabase mode was verified once by hand against a live project (schema, seed, the full
   API flow and the RLS policies with direct user tokens), but those checks are not part of
   the automated test suite, which runs on the local store.
-- The `Dockerfile` and `render.yaml` have not been built on a real host yet; the same
-  build and start commands are what `npm run test:e2e:prod` exercises locally.
+- `render.yaml` is verified on Render's free tier. The `Dockerfile` has not been built on
+  a real host yet; it runs the same build and start commands.
 - Automated browser tests run in Chromium-based browsers (Edge/Chrome) only.
