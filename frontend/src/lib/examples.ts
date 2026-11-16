@@ -2,6 +2,11 @@
 import { buildAutomaton } from '@automata/algorithms';
 import type { Automaton } from '@automata/shared';
 
+/** Override the automatic layout for examples where a hand-placed picture reads better. */
+function place(automaton: Automaton, positions: Record<string, [number, number]>): Automaton {
+  return { ...automaton, states: automaton.states.map((s) => (positions[s.label] ? { ...s, x: positions[s.label]![0], y: positions[s.label]![1] } : s)) };
+}
+
 export interface Example {
   id: string;
   name: string;
@@ -119,7 +124,8 @@ export const EXAMPLES: Example[] = [
     name: 'Turing machine: aⁿbⁿ',
     description: 'Repeatedly crosses off one a and one b.',
     sample: 'aabb',
-    automaton: buildAutomaton('TM', {
+    automaton: place(
+      buildAutomaton('TM', {
       states: ['q0', 'q1', 'q2', 'q3', 'acc'],
       initial: 'q0',
       accepting: ['acc'],
@@ -134,7 +140,10 @@ export const EXAMPLES: Example[] = [
         ['q3', 'Y → Y, R', 'q3'],
         ['q3', '_ → _, S', 'acc'],
       ],
-    }),
+      }),
+      // The crossing-off loop q0 → q1 → q2 → q0 on top, the final check q3 → acc below.
+      { q0: [80, 200], q1: [330, 40], q2: [580, 200], q3: [330, 400], acc: [80, 430] },
+    ),
   },
   {
     id: 'tm-increment',
