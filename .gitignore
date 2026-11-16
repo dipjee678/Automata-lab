@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.env
+.env.local
+backend/data/
+test-results/
+playwright-report/
+*.log
+.e2e-data/

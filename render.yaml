@@ -1,0 +1,24 @@
+# Render blueprint: one free web service that serves the API and the frontend.
+# Set the three SUPABASE_* values in the Render dashboard (they are secrets and
+# are deliberately not stored in this file).
+services:
+  - type: web
+    name: automata-lab
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: ALLOW_TEACHER_SIGNUP
+        value: "true"

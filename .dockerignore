@@ -1,0 +1,12 @@
+node_modules
+**/node_modules
+frontend/dist
+backend/data
+backend/.e2e-data
+backend/.env
+**/.env
+.git
+test-results
+playwright-report
+e2e
+.claude
