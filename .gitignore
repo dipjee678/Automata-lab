@@ -7,3 +7,6 @@ test-results/
 playwright-report/
 *.log
 .e2e-data/
+
+# Local Claude Code settings
+.claude/
