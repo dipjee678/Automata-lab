@@ -22,6 +22,14 @@ export interface Deps {
   store: Store;
   auth: AuthProvider;
   allowTeacherSignup: boolean;
+  /** Public demo logins offered on the sign-in page (empty = none). */
+  demoAccounts?: DemoAccount[];
+}
+
+export interface DemoAccount {
+  role: 'student' | 'teacher';
+  email: string;
+  password: string;
 }
 
 declare module 'express-serve-static-core' {

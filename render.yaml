@@ -22,3 +22,7 @@ services:
         sync: false
       - key: ALLOW_TEACHER_SIGNUP
         value: "true"
+      # One-click "Try as student / teacher" buttons on the sign-in page.
+      # Set to an empty value to hide them.
+      - key: DEMO_LOGINS
+        value: "student,teacher"

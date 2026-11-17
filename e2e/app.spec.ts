@@ -19,6 +19,14 @@ test.describe('authentication and roles', () => {
     await expect(page.getByRole('alert')).toContainText('Invalid email or password');
   });
 
+  test('the demo buttons sign in with one click', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByRole('button', { name: 'Try as admin' })).toHaveCount(0);
+    await page.getByRole('button', { name: 'Try as teacher' }).click();
+    await expect(page.getByRole('heading', { name: /Welcome/ })).toBeVisible();
+    await expect(page.getByText('Dr. Tara Teacher').first()).toBeVisible();
+  });
+
   test('a student cannot open the admin area, an admin can', async ({ page }) => {
     await login(page, 'student');
     await expect(page.getByRole('link', { name: 'Users' })).toHaveCount(0);

@@ -317,6 +317,19 @@ describe('demo seed', () => {
     expect(await fresh.store.find('grades')).toHaveLength(4);
   });
 
+  it('offers only the configured demo logins, never the admin', async () => {
+    const { loadConfig } = await import('../src/config');
+    const { createDeps } = await import('../src/app');
+    const base = { SUPABASE_URL: 'https://x.supabase.co', SUPABASE_ANON_KEY: 'a', SUPABASE_SERVICE_ROLE_KEY: 'b' };
+    const health = async (env: NodeJS.ProcessEnv) => (await request(createApp(createDeps(loadConfig(env)))).get('/api/health')).body.demoAccounts;
+    expect(await health(base)).toEqual([]);
+    expect(await health({ ...base, DEMO_LOGINS: 'student, teacher, admin' })).toEqual([
+      { role: 'student', email: 'student@automatalab.test', password: SEED_PASSWORD },
+      { role: 'teacher', email: 'teacher@automatalab.test', password: SEED_PASSWORD },
+    ]);
+    expect((await api.get('/api/health')).body.demoAccounts).toEqual([]);
+  });
+
   it('every built-in practice problem has a consistent reference', async () => {
     const { PRACTICE_PROBLEMS } = await import('../src/practice/problems');
     const { validateQuestion } = await import('@automata/algorithms');

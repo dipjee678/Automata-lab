@@ -41,6 +41,11 @@ first start.
 Password for all of them: the value of `SEED_PASSWORD` (default in `backend/.env.example`).
 The demo course join code is `DEMO331`. Sample data only — do not seed a production database.
 
+The sign-in page shows one-click **Try as student / Try as teacher** buttons for these
+accounts. They are on by default in local mode and off with Supabase; set
+`DEMO_LOGINS=student,teacher` (or just `student`) to show them, or leave it empty to hide them.
+The admin account is never offered.
+
 ## Connect Supabase
 
 1. Create a Supabase project and run `database/schema.sql` in the SQL editor.
@@ -126,7 +131,8 @@ npm run test:e2e:prod
   ```
 
   (`enable` reverses it.) A public showcase can keep the demo student and teacher,
-  but the demo admin should always be disabled.
+  but the demo admin should always be disabled. Hide the one-click demo buttons by
+  clearing `DEMO_LOGINS`.
 - Create your own admin: register normally, then set `role = 'admin'` for that row in
   the `profiles` table (Supabase → Table Editor). Further admins can be promoted in the app.
 - Set `ALLOW_TEACHER_SIGNUP=false` if teachers should only be appointed by an admin.

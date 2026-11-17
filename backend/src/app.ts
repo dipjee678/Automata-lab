@@ -7,13 +7,22 @@ import helmet from 'helmet';
 import { createClient } from '@supabase/supabase-js';
 import { LocalAuth, resolveJwtSecret, SupabaseAuth } from './auth/provider';
 import type { Config } from './config';
-import { errorHandler, HttpError, type Deps } from './http';
+import { errorHandler, HttpError, type DemoAccount, type Deps } from './http';
 import { assignmentRoutes } from './routes/assignments';
 import { authRoutes } from './routes/auth';
 import { courseRoutes } from './routes/courses';
 import { workspaceRoutes } from './routes/workspace';
+import { SEED_PASSWORD, SEED_USERS } from './seed';
 import { LocalStore } from './store/localStore';
 import { SupabaseStore } from './store/supabaseStore';
+
+/** The seeded demo accounts that the sign-in page may offer (their password is public). */
+function demoAccounts(config: Config): DemoAccount[] {
+  return config.demoLogins.flatMap((role) => {
+    const user = SEED_USERS.find((u) => u.role === role);
+    return user ? [{ role, email: user.email, password: SEED_PASSWORD }] : [];
+  });
+}
 
 /** Build the store + auth provider for the configured mode. */
 export function createDeps(config: Config): Deps {
@@ -21,10 +30,10 @@ export function createDeps(config: Config): Deps {
     const options = { auth: { persistSession: false, autoRefreshToken: false } };
     const admin = createClient(config.supabaseUrl, config.supabaseServiceKey, options);
     const anon = createClient(config.supabaseUrl, config.supabaseAnonKey, options);
-    return { store: new SupabaseStore(admin), auth: new SupabaseAuth(admin, anon), allowTeacherSignup: config.allowTeacherSignup };
+    return { store: new SupabaseStore(admin), auth: new SupabaseAuth(admin, anon), allowTeacherSignup: config.allowTeacherSignup, demoAccounts: demoAccounts(config) };
   }
   const store = new LocalStore(path.join(config.dataDir, 'db.json'));
-  return { store, auth: new LocalAuth(store, resolveJwtSecret(config.jwtSecret, config.dataDir)), allowTeacherSignup: config.allowTeacherSignup };
+  return { store, auth: new LocalAuth(store, resolveJwtSecret(config.jwtSecret, config.dataDir)), allowTeacherSignup: config.allowTeacherSignup, demoAccounts: demoAccounts(config) };
 }
 
 /** Purely in-memory dependencies for tests. */
@@ -64,7 +73,7 @@ export function createApp(deps: Deps, opts: { corsOrigins?: string[]; serveFront
   app.use(express.json({ limit: '1mb' }));
 
   app.get('/api/health', (_req, res) => {
-    res.json({ ok: true, mode: deps.auth.mode, allowTeacherSignup: deps.allowTeacherSignup });
+    res.json({ ok: true, mode: deps.auth.mode, allowTeacherSignup: deps.allowTeacherSignup, demoAccounts: deps.demoAccounts ?? [] });
   });
 
   app.use('/api', authRoutes(deps));

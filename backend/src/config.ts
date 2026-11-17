@@ -26,6 +26,8 @@ export interface Config {
   /** True when running behind a reverse proxy (any hosted deployment). */
   trustProxy: boolean;
   production: boolean;
+  /** Roles whose seeded demo account gets a one-click button on the sign-in page. */
+  demoLogins: Array<'student' | 'teacher'>;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -47,5 +49,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     allowTeacherSignup: (env.ALLOW_TEACHER_SIGNUP ?? 'true') !== 'false',
     trustProxy: (env.TRUST_PROXY ?? (env.NODE_ENV === 'production' ? 'true' : 'false')) === 'true',
     production: env.NODE_ENV === 'production',
+    // DEMO_LOGINS=student,teacher shows one-click demo sign-in buttons. Defaults to both in
+    // local mode and to none on Supabase, where the demo accounts may not exist.
+    demoLogins: (env.DEMO_LOGINS ?? (hasSupabase ? '' : 'student,teacher'))
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s): s is 'student' | 'teacher' => s === 'student' || s === 'teacher'),
   };
 }

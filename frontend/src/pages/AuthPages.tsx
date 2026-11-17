@@ -33,25 +33,28 @@ export function LoginPage() {
   const { user, login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const health = useFetch<{ mode: string }>('/health');
+  const health = useFetch<{ mode: string; demoAccounts?: Array<{ role: string; email: string; password: string }> }>('/health');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   if (user) return <Navigate to="/" replace />;
 
-  const submit = async (e: FormEvent) => {
-    e.preventDefault();
+  const signIn = async (address: string, secret: string) => {
     setBusy(true);
     setError(null);
     try {
-      await login(email, password);
+      await login(address, secret);
       navigate((location.state as { from?: string } | null)?.from ?? '/', { replace: true });
     } catch (err) {
       setError(errorMessage(err));
     } finally {
       setBusy(false);
     }
+  };
+  const submit = (e: FormEvent) => {
+    e.preventDefault();
+    void signIn(email, password);
   };
 
   return (
@@ -79,7 +82,20 @@ export function LoginPage() {
           Sign in
         </Button>
       </form>
-      {health.data?.mode === 'local' && (
+      {!!health.data?.demoAccounts?.length && (
+        <div className="mt-5 border-t border-line pt-4" data-testid="demo-logins">
+          <p className="mb-2 text-sm font-medium">Just looking around?</p>
+          <p className="mb-3 text-xs text-muted">Sign in to a shared demo account with sample courses and assignments. Anyone can use it, so please don't enter personal data.</p>
+          <div className="grid grid-cols-2 gap-2">
+            {health.data.demoAccounts.map((d) => (
+              <Button key={d.role} type="button" disabled={busy} onClick={() => signIn(d.email, d.password)}>
+                Try as {d.role}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+      {health.data?.mode === 'local' && !health.data.demoAccounts?.length && (
         <div className="mt-5">
           <Notice>
             This server runs in <strong>local demo mode</strong>. Sample teacher, student and admin accounts are listed in the project README.
